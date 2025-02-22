@@ -1,0 +1,20 @@
+name: hello-world workflow
+
+on:
+    push:
+        branches:
+            - main
+            - release/**
+        paths:
+            - "**"
+
+    schedule:
+        - cron: "*/1 * * * *"
+
+# echo hello-world message
+jobs:
+    echo:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Echo hello-world message
+              run: echo "Hello, world!"
