@@ -1,18 +1,17 @@
-name: Matrix-Workflow
+# name: Matrix-Workflow
 
-on:
-    push:
-        branches:
-            - main
+# on:
+#     push:
+#         branches:
+#             - main
 
-jobs:
-    example_matrix:
-        strategy:
-            matrix:
-                version: [10, 12, 14]
-                os: [ubuntu-latest, macos-latest]
-        runs-on: ${{ matrix.os }}
-        steps:
-            - uses: actions/setup-node@v4
-              with:
-                  node-version: ${{ matrix.version }}
+# jobs:
+#     example_matrix:
+#         strategy:
+#             matrix:
+#                 version: [10, 12, 14]
+#         runs-on: ${{ matrix.os }}
+#         steps:
+#             - uses: actions/setup-node@v4
+#               with:
+#                   node-version: ${{ matrix.version }}
