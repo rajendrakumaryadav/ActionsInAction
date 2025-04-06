@@ -1,51 +1,59 @@
 name: My First Workflow
 on:
-    push:
-        branches:
-            - main
-    workflow_dispatch:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-    MyFirstJob:
-        runs-on: ubuntu-latest
-        steps:
-            - run: echo "Hello, World!"
+  MyFirstJob:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
 
-            - name: checkout
-              uses: actions/checkout@v4.2.2
+      - name: checkout
+        uses: actions/checkout@v4.2.2
 
-            - name: List filles in the repository
-              run: |
-                  echo "The repository ${{github.repository}} contains the following files"
-                  tree
-    job_2:
-        needs: MyFirstJob
-        runs-on: ubuntu-latest
-        steps:
-            - run: echo "Hello, World!"
+      - name: List filles in the repository
+        run: |
+          echo "The repository ${{github.repository}} contains the following files"
+          tree
+  job_2:
+    needs: MyFirstJob
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
 
-            - name: checkout
-              uses: actions/checkout@v4.2.2
+      - name: checkout
+        uses: actions/checkout@v4.2.2
 
-            - name: List filles in the repository
-              run: |
-                  echo "The repository ${{github.repository}} contains the following files"
-                  tree
-    job_3:
-        needs: MyFirstJob
-        runs-on: ubuntu-latest
-        steps:
-            - run: echo "Hello, World!"
+      - name: List filles in the repository
+        run: |
+          echo "The repository ${{github.repository}} contains the following files"
+          tree
+  job_3:
+    needs: MyFirstJob
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
 
-            - name: checkout
-              uses: actions/checkout@v4.2.2
+      - name: checkout
+        uses: actions/checkout@v4.2.2
 
-            - name: List filles in the repository
-              run: |
-                  echo "The repository ${{github.repository}} contains the following files"
-                  tree
-    job_4:
-        needs: [job_2, job_3]
-        runs-on: ubuntu-latest
-        steps:
-            - run: echo "Hello, World!"
+      - name: List filles in the repository
+        run: |
+          echo "The repository ${{github.repository}} contains the following files"
+          tree
+  job_4:
+    needs: [job_2, job_3]
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Hello, World!"
+
+  job_5:
+    needs: [job_2, job_3, job_4]
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          apt install -y fastfetch
+          fastfetch
