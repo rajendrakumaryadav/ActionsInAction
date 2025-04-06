@@ -55,5 +55,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          sudo apt install -y fastfetch
+          sudo apt update && sudo apt install -y fastfetch
           fastfetch
