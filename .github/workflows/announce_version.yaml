@@ -2,7 +2,8 @@ name: "📢 Announce New Version"
 
 on:
   workflow_run:
-    workflows: ["🚀 Automated Version Bump"]
+    # CORRECTED: This now refers to the FILENAME of the first workflow.
+    workflows: ["version-bump.yml"]
     types:
       - completed
 
@@ -21,7 +22,8 @@ jobs:
       - name: "📄 Read and Print Version"
         id: read_version
         run: |
-          VERSION_FILE=$(find . -type f -name "version")
+          # Corrected to find 'version.txt'
+          VERSION_FILE=$(find . -type f -name "version.txt")
           if [ -f "$VERSION_FILE" ]; then
             NEW_VERSION=$(cat $VERSION_FILE)
             echo "🎉 A new version has been created: $NEW_VERSION"
