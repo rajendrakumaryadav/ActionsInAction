@@ -2,7 +2,7 @@ name: "🚀 Automated Version Bump"
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [closed]
     branches:
       - "release/**"
 
