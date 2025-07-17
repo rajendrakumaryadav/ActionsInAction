@@ -2,8 +2,7 @@ name: "📢 Announce New Version"
 
 on:
   workflow_run:
-    # CORRECTED: This now refers to the FILENAME of the first workflow.
-    workflows: ["version-bump.yml"]
+    workflows: ["version_bump.yml"]
     types:
       - completed
 

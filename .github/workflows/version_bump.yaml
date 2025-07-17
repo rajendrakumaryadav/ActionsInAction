@@ -2,11 +2,10 @@ name: "🚀 Automated Version Bump"
 
 on:
   pull_request:
-    # This now correctly triggers when you open a PR from 'release/...' to 'main'
     branches:
-      - "main"
+      - release/**
     paths:
-      - "application/**"
+      - applications/**
 
 permissions:
   contents: write
