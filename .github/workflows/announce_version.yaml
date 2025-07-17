@@ -1,0 +1,45 @@
+name: "📢 Announce New Version"
+
+on:
+  workflow_run:
+    workflows: ["🚀 Automated Version Bump"]
+    types:
+      - completed
+
+jobs:
+  read-version:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+
+    steps:
+      - name: "📥 Download Version Info Artifact"
+        uses: actions/download-artifact@v4
+        with:
+          name: version-data
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: "📄 Read and Print Version"
+        id: read_version
+        run: |
+          VERSION_FILE=$(find . -type f -name "version")
+          if [ -f "$VERSION_FILE" ]; then
+            NEW_VERSION=$(cat $VERSION_FILE)
+            echo "🎉 A new version has been created: $NEW_VERSION"
+            echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Could not find the version file."
+            exit 1
+          fi
+
+      - name: "📝 Create Summary File"
+        if: steps.read_version.outputs.new_version
+        run: |
+          echo "Ready to deploy version ${{ steps.read_version.outputs.new_version }}" > summary.txt
+
+      - name: "📦 Upload Summary Artifact"
+        if: steps.read_version.outputs.new_version
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-summary
+          path: summary.txt
+          retention-days: 1
