@@ -1,0 +1,91 @@
+name: "🚀 Automated Version Bump"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches:
+      - "release/**"
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  version-bump:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.draft == false
+
+    steps:
+      - name: "📚 Check out code"
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: "🆔 Extract App ID from branch name"
+        id: extract_app_id
+        run: |
+          BRANCH_NAME="${{ github.head_ref }}"
+          APP_ID=$(echo "$BRANCH_NAME" | sed 's/release\///')
+          echo "app_id=$APP_ID" >> $GITHUB_OUTPUT
+
+      - name: "🔎 Determine Version Bump Type"
+        id: bump_type
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          BUMP_TYPE=""
+          if [[ "$PR_TITLE" == major:* ]]; then
+            BUMP_TYPE="major"
+          elif [[ "$PR_TITLE" == minor:* ]]; then
+            BUMP_TYPE="minor"
+          elif [[ "$PR_TITLE" == bugfix:* ]]; then
+            BUMP_TYPE="patch"
+          else
+            echo "PR title does not match required format (major:|minor:|bugfix:)."
+            echo "Skipping version bump."
+            echo "skip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "bump=$BUMP_TYPE" >> $GITHUB_OUTPUT
+
+      - name: "⚙️ Calculate and Update Version"
+        if: steps.bump_type.outputs.skip != 'true'
+        id: versioning
+        run: |
+          APP_ID="${{ steps.extract_app_id.outputs.app_id }}"
+          BUMP_TYPE="${{ steps.bump_type.outputs.bump }}"
+          VERSION_FILE="application/$APP_ID/version"
+          mkdir -p "$(dirname "$VERSION_FILE")"
+          if [ -f "$VERSION_FILE" ]; then
+            CURRENT_VERSION=$(cat "$VERSION_FILE")
+          else
+            CURRENT_VERSION="0.0.0"
+          fi
+          IFS='.' read -r -a VERSION_PARTS <<< "$CURRENT_VERSION"
+          MAJOR=${VERSION_PARTS[0]}; MINOR=${VERSION_PARTS[1]}; PATCH=${VERSION_PARTS[2]}
+          case "$BUMP_TYPE" in
+            major) MAJOR=$((MAJOR + 1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR + 1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH + 1)) ;;
+          esac
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "Bumping version for '$APP_ID' from $CURRENT_VERSION to $NEW_VERSION"
+          echo "$NEW_VERSION" > "$VERSION_FILE"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "version_file_path=$VERSION_FILE" >> $GITHUB_OUTPUT
+
+      - name: "💾 Commit and Push Version File"
+        if: steps.versioning.outputs.new_version
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(version): Bump version for ${{ steps.extract_app_id.outputs.app_id }} to ${{ steps.versioning.outputs.new_version }}"
+          file_pattern: ${{ steps.versioning.outputs.version_file_path }}
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: "📦 Upload Version Info as Artifact"
+        if: steps.versioning.outputs.new_version
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-data
+          path: ${{ steps.versioning.outputs.version_file_path }}
+          retention-days: 1
